@@ -1,34 +1,5 @@
+import { postEnvelope } from "./delivery";
 import type { FederationStore } from "./store";
-import type { OutboxEntry } from "./types";
-
-export async function sendOutboxEntry(entry: OutboxEntry): Promise<{
-  ok: boolean;
-  status?: number;
-  error?: string;
-}> {
-  try {
-    const response = await fetch(entry.url, {
-      method: entry.method,
-      headers: {
-        "content-type": "application/json",
-        accept: "application/json",
-      },
-      body: JSON.stringify(entry.envelope),
-      signal: AbortSignal.timeout(20_000),
-    });
-
-    return {
-      ok: response.ok,
-      status: response.status,
-      ...(response.ok ? {} : { error: await response.text() }),
-    };
-  } catch (error) {
-    return {
-      ok: false,
-      error: error instanceof Error ? error.message : String(error),
-    };
-  }
-}
 
 export async function processOutbox(store: FederationStore): Promise<number> {
   await store.init();
@@ -47,7 +18,7 @@ export async function processOutbox(store: FederationStore): Promise<number> {
       continue;
     }
 
-    const result = await sendOutboxEntry(entry);
+    const result = await postEnvelope(entry);
     await store.appendOutboxAttempt({
       id: entry.id,
       attempted_at: new Date().toISOString(),

@@ -90,6 +90,8 @@ export interface OutboxAttempt {
   attempted_at: string;
   ok: boolean;
   status?: number;
+  statusText?: string;
+  body?: string;
   error?: string;
 }
 

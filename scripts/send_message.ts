@@ -1,5 +1,6 @@
 import { loadConfig } from "../src/config";
 import { signEnvelope } from "../src/crypto";
+import { deliverEnvelopeOrQueue } from "../src/delivery";
 import { originFromUrl } from "../src/handle";
 import { FederationStore } from "../src/store";
 import type {
@@ -90,29 +91,19 @@ const store = new FederationStore(config.dataDir);
 await store.init();
 await recordLocalOutbound(store, envelope);
 
-const response = await fetch(url, {
+const entry: OutboxEntry = {
+  id: envelope.id,
+  url,
   method: "POST",
-  headers: {
-    "content-type": "application/json",
-    accept: "application/json",
-  },
-  body: JSON.stringify(envelope),
-});
-
-const body = await response.text();
-console.log(`${response.status} ${response.statusText}`);
-console.log(body);
-
-if (!response.ok) {
-  const entry: OutboxEntry = {
-    id: envelope.id,
-    url,
-    method: "POST",
-    path,
-    envelope,
-    created_at: now,
-  };
-  await store.appendOutbox(entry);
+  path,
+  envelope,
+  created_at: now,
+};
+const result = await deliverEnvelopeOrQueue(store, entry);
+console.log(result.status ? `${result.status} ${result.statusText ?? ""}` : "0 DELIVERY_FAILED");
+if (result.body) console.log(result.body);
+if (!result.ok) {
+  if (result.error && !result.body) console.error(result.error);
   console.error(`Queued failed send in ${config.dataDir}/outbox.jsonl`);
   process.exit(1);
 }
