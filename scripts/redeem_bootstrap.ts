@@ -1,6 +1,7 @@
 import { loadConfig, publicIdentity } from "../src/config";
 import { verifyEnvelopeSignature } from "../src/crypto";
 import { originFromUrl } from "../src/handle";
+import { describeUnreachable, fetchText } from "../src/http-client";
 import { recordInboxItem } from "../src/inbox";
 import { recordNotification } from "../src/notifications";
 import { FederationStore } from "../src/store";
@@ -37,7 +38,7 @@ if (!config.baseUrl) {
 
 const code = requiredArg("code");
 const inviterUrl = requiredArg("url").replace(/\/$/, "");
-const response = await fetch(`${inviterUrl}/api/federation/bootstrap/redeem`, {
+const response = await fetchText(`${inviterUrl}/api/federation/bootstrap/redeem`, {
   method: "POST",
   headers: {
     "content-type": "application/json",
@@ -49,12 +50,23 @@ const response = await fetch(`${inviterUrl}/api/federation/bootstrap/redeem`, {
   }),
 });
 
-const text = await response.text();
+if (!response.reached) {
+  console.error(
+    describeUnreachable(
+      "Alice's Zoiree service",
+      inviterUrl,
+      response.error,
+    ),
+  );
+  console.error("Keep this invite code and retry redemption later.");
+  process.exit(1);
+}
+
 console.log(`${response.status} ${response.statusText}`);
-console.log(text);
+console.log(response.text);
 if (!response.ok) process.exit(1);
 
-const payload = JSON.parse(text) as BootstrapRedeemResponse;
+const payload = JSON.parse(response.text) as BootstrapRedeemResponse;
 const invite: FederationEnvelope = payload.invite;
 assertEnvelopeForLocalRecipient(invite, config.handle);
 assertTimestampFresh(invite.sent_at, config.maxClockSkewMs);

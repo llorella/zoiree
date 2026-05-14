@@ -1,6 +1,7 @@
 import { loadConfig } from "../src/config";
 import { signRequestAuth, verifyEnvelopeSignature } from "../src/crypto";
 import { originFromUrl } from "../src/handle";
+import { describeUnreachable, fetchText } from "../src/http-client";
 import { getOrFetchPeer } from "../src/peers";
 import { FederationStore } from "../src/store";
 import type {
@@ -56,7 +57,7 @@ const signature = signRequestAuth(
   config.privateKey,
 );
 
-const response = await fetch(`${baseUrl}${path}`, {
+const response = await fetchText(`${baseUrl}${path}`, {
   headers: {
     accept: "application/json",
     "x-zoiree-id": auth.id,
@@ -67,8 +68,14 @@ const response = await fetch(`${baseUrl}${path}`, {
   },
 });
 
+if (!response.reached) {
+  console.error(describeUnreachable("Peer Zoiree service", baseUrl, response.error));
+  console.error("No messages were imported. Retry later or ask the peer to verify their Zoiree service.");
+  process.exit(1);
+}
+
 console.log(`${response.status} ${response.statusText}`);
-const text = await response.text();
+const text = response.text;
 console.log(text);
 if (!response.ok) process.exit(1);
 
