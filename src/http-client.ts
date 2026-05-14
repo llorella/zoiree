@@ -1,3 +1,5 @@
+type Fetcher = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+
 export type FetchTextResult =
   | {
       reached: true;
@@ -15,9 +17,10 @@ export async function fetchText(
   url: string,
   init: RequestInit = {},
   timeoutMs = 20_000,
+  fetcher: Fetcher = fetch,
 ): Promise<FetchTextResult> {
   try {
-    const response = await fetch(url, {
+    const response = await fetcher(url, {
       ...init,
       signal: init.signal ?? AbortSignal.timeout(timeoutMs),
     });

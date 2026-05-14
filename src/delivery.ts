@@ -1,6 +1,8 @@
 import type { FederationStore } from "./store";
 import type { OutboxEntry } from "./types";
 
+type Fetcher = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+
 export interface DeliveryAttempt {
   ok: boolean;
   status?: number;
@@ -16,9 +18,10 @@ export interface QueuedDeliveryAttempt extends DeliveryAttempt {
 export async function postEnvelope(
   entry: OutboxEntry,
   timeoutMs = 20_000,
+  fetcher: Fetcher = fetch,
 ): Promise<DeliveryAttempt> {
   try {
-    const response = await fetch(entry.url, {
+    const response = await fetcher(entry.url, {
       method: entry.method,
       headers: {
         "content-type": "application/json",
@@ -46,8 +49,10 @@ export async function postEnvelope(
 export async function deliverEnvelopeOrQueue(
   store: FederationStore,
   entry: OutboxEntry,
+  timeoutMs = 20_000,
+  fetcher: Fetcher = fetch,
 ): Promise<QueuedDeliveryAttempt> {
-  const result = await postEnvelope(entry);
+  const result = await postEnvelope(entry, timeoutMs, fetcher);
   if (result.ok) {
     return { ...result, queued: false };
   }
