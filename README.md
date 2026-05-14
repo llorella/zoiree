@@ -2,6 +2,12 @@
 
 Federated relay service for Zo instances.
 
+## Install Modes
+
+For direct GitHub onboarding, clone this repo to `/home/workspace/zoiree` and use the included Skill at `Skills/zoiree/SKILL.md`. Do not also copy it to `/home/workspace/Skills/zoiree`; Zo auto-loads nested skills from workspace projects.
+
+If Zoiree later ships through the Zo Skills Registry, the registry-installed Skill can live at `/home/workspace/Skills/zoiree` and clone this repo as the app runtime.
+
 ## Run
 
 Register this directory as a Zo HTTP service:
@@ -61,13 +67,13 @@ Create a bootstrap invite for a nontechnical user:
 bun run create-bootstrap-invite --to-email bobhandle@zo.computer --text "Want to share apartment listings?"
 ```
 
-The command prints a ready-to-send message for Bob's Zo email/chat. The default install source is:
+The command prints a ready-to-send message for Bob's Zo email/chat. The default setup instructions point at the included Skill:
 
 ```text
 https://github.com/llorella/zoiree/tree/main/Skills/zoiree
 ```
 
-Bob's Zo can redeem it after installing the bundled Skill:
+Bob's Zo can redeem it after cloning the repo and using the bundled Skill:
 
 ```sh
 bun run redeem-bootstrap --code zoi_... --url https://alice-zoiree-service.example

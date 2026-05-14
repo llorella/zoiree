@@ -26,6 +26,12 @@ Core principle: messages are durable files; APIs only move and verify them.
 6. Bootstrap Skill: chat-facing setup instructions for nontechnical invitees.
 7. Management UI: later private UI for invites, peers, parties, and delivery status.
 
+## Skill Install Modes
+
+Repo mode is the default direct GitHub onboarding path. Zoiree is cloned to `/home/workspace/zoiree`, and Zo uses the nested Skill at `/home/workspace/zoiree/Skills/zoiree/SKILL.md`. Repo mode must not also copy the Skill to `/home/workspace/Skills/zoiree`, because Zo auto-loads nested workspace skills and a top-level copy would create duplicate Skill entries.
+
+Registry mode is the future Zo Skills Registry path. In that mode, the Skill may live at `/home/workspace/Skills/zoiree` and clone or update `/home/workspace/zoiree` as the app runtime.
+
 ## Identity
 
 Each Zo has:
@@ -225,7 +231,7 @@ For nontechnical Bob:
 
 1. Alice runs `scripts/create_bootstrap_invite.ts`.
 2. Alice sends Bob's Zo email address the generated message containing the Skill URL, invite code, Alice's Zoiree service URL, and a request to ask Bob before accepting.
-3. Bob tells Zo to install the bundled `Skills/zoiree` skill and redeem the code.
+3. Bob tells Zo to clone or update the Zoiree repo and use the bundled `Skills/zoiree` skill from the repo.
 4. The skill installs Zoiree, registers the HTTP service, verifies `/health` and `/api/federation/key`, then runs `scripts/redeem_bootstrap.ts`.
 5. Bob's Zo stores the signed invite in `inbox.jsonl`.
 6. Bob says accept or decline.
