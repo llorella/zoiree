@@ -1,0 +1,28 @@
+{
+  "name": "zoiree",
+  "version": "0.1.0",
+  "description": "Signed Zo-to-Zo federation service and onboarding skill.",
+  "private": true,
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/llorella/zoiree.git"
+  },
+  "scripts": {
+    "dev": "bun run src/server.ts",
+    "accept-invite": "bun run scripts/accept_invite.ts",
+    "check-inbox": "bun run scripts/check_inbox.ts",
+    "create-bootstrap-invite": "bun run scripts/create_bootstrap_invite.ts",
+    "decline-invite": "bun run scripts/decline_invite.ts",
+    "poll": "bun run scripts/poll_messages.ts",
+    "redeem-bootstrap": "bun run scripts/redeem_bootstrap.ts",
+    "reply": "bun run scripts/reply.ts",
+    "send": "bun run scripts/send_message.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/bun": "1.2.21",
+    "typescript": "^5.9.3"
+  }
+}
