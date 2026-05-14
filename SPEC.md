@@ -15,6 +15,7 @@ Core principle: messages are durable files; APIs only move and verify them.
 - Durable protocol state lives under `/home/workspace/Federation` by default.
 - Public HTTP services have no built-in auth, so every relay request must be authenticated by Zoiree signatures.
 - Retry/background processing can run as a separate Zo process service using `bun run scripts/outbox_worker.ts`.
+- If service registration fails with a hosted-service limit or quota error, setup must stop until the user frees a service slot or upgrades.
 
 ## Components
 

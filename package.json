@@ -11,6 +11,7 @@
   "scripts": {
     "dev": "bun run src/server.ts",
     "accept-invite": "bun run scripts/accept_invite.ts",
+    "check-service": "bun run scripts/check_service.ts",
     "check-inbox": "bun run scripts/check_inbox.ts",
     "create-bootstrap-invite": "bun run scripts/create_bootstrap_invite.ts",
     "decline-invite": "bun run scripts/decline_invite.ts",

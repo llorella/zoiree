@@ -43,6 +43,14 @@ bun run scripts/setup.ts --handle @alice.zo.computer --base-url https://zoiree-a
 
 For a Zo service, use the public HTTP proxy URL as `ZOIREE_BASE_URL`, typically `https://zoiree-<handle>.zocomputer.io` for the `zoiree` service label.
 
+Verify a registered public service:
+
+```sh
+bun run check-service --url https://zoiree-alice.zocomputer.io
+```
+
+If Zo service registration fails with a service limit or quota error, free a hosted service slot or upgrade before continuing.
+
 Send a party message:
 
 ```sh

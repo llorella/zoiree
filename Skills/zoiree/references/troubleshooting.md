@@ -2,6 +2,8 @@
 
 ## Service Does Not Start
 
+If service registration fails with a service limit, quota, or plan error, Zoiree is not publicly reachable yet. The user must free a hosted service slot or upgrade, then register the service again.
+
 Run from `/home/workspace/zoiree`:
 
 ```sh
@@ -13,6 +15,12 @@ PORT=3000 bun run dev
 ```
 
 Missing `ZOIREE_HANDLE` or `ZOIREE_PUBLIC_KEY` means setup has not run or service env is missing.
+
+After registration, verify the public service:
+
+```sh
+bun run /home/workspace/zoiree/Skills/zoiree/scripts/verify_install.ts --project-dir /home/workspace/zoiree --url PUBLIC_SERVICE_URL
+```
 
 ## Invite Redemption Fails
 

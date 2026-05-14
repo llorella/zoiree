@@ -83,11 +83,12 @@ Workflow:
      - `ZOIREE_BASE_URL` once the public service URL is known
      - `ZOIREE_DATA_DIR=/home/workspace/Federation`
 
+   If Zo reports a service limit, quota, or plan error, stop setup and tell the user they need to free a hosted service slot or upgrade before Zoiree can receive public federation traffic.
 6. Once the public service URL is known, add/update `ZOIREE_BASE_URL` in `.env` and service env, then restart the service.
 7. Verify:
 
    ```sh
-   bun run /home/workspace/zoiree/Skills/zoiree/scripts/verify_install.ts --url PUBLIC_SERVICE_URL
+   bun run /home/workspace/zoiree/Skills/zoiree/scripts/verify_install.ts --project-dir /home/workspace/zoiree --url PUBLIC_SERVICE_URL
    ```
 
 8. Redeem Alice's invite:
