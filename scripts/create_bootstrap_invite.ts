@@ -74,4 +74,6 @@ console.log("Ask me before accepting or declining the invite.");
 console.log("");
 console.log(`Reference: ${setupLine}.`);
 console.log(serviceUrlLine);
+console.log("If Alice's Zo can send email, send this prompt to Bob. Otherwise Alice can copy and send it manually.");
+console.log("Bob does not need email integration; he only needs to read the invite and paste the prompt into Zo chat.");
 console.log("Only continue if Bob explicitly approves setup and accepting the invite.");

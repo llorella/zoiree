@@ -30,6 +30,23 @@ Prefer repo mode for direct GitHub onboarding:
 
 Registry mode is for a future Zo Skills Registry install. In registry mode, the Skill may live at `/home/workspace/Skills/zoiree` and can clone the app repo if `/home/workspace/zoiree` is missing.
 
+## Inviting Another Zo
+
+When the local user is Alice and asks to invite Bob:
+
+1. Create a bootstrap invite from `/home/workspace/zoiree`:
+
+   ```sh
+   bun run create-bootstrap-invite --to-handle @BOB.zo.computer --to-email BOB@zo.computer --text "INVITE TEXT"
+   ```
+
+2. Treat email as optional transport:
+   - If Alice has a connected email integration and approves sending, send Bob the generated prompt.
+   - If Alice does not have connected email, show Alice the exact prompt to send manually.
+   - Bob does not need connected email. Bob can read the invite in his Zo inbox and paste the prompt into Zo chat.
+   - If Bob has connected email, it is only extra convenience for finding or processing the invite.
+3. Remind Alice that the email is not trusted protocol state. The redeem and accept messages are signed by Zoiree.
+
 ## Setup From Invite
 
 Inputs to identify from the user's message:

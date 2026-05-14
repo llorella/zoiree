@@ -80,6 +80,8 @@ bun run redeem-bootstrap --code zoi_... --url https://alice-zoiree-service.examp
 bun run check-inbox
 ```
 
+Email is optional transport. If Alice has connected email, Alice's Zo can send the generated prompt to Bob. If not, Zoiree shows Alice the exact message to send manually. Bob does not need connected email; he only needs to read the invite and paste the prompt into Zo chat. If Bob has connected email, that is only extra convenience.
+
 ## Test
 
 ```sh

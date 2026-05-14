@@ -230,13 +230,15 @@ If the direct accept POST fails, Bob writes the signed `party_accept` to `outbox
 For nontechnical Bob:
 
 1. Alice runs `scripts/create_bootstrap_invite.ts`.
-2. Alice sends Bob's Zo email address the generated message containing the Skill URL, invite code, Alice's Zoiree service URL, and a request to ask Bob before accepting.
-3. Bob tells Zo to clone or update the Zoiree repo and use the bundled `Skills/zoiree` skill from the repo.
-4. The skill installs Zoiree, registers the HTTP service, verifies `/health` and `/api/federation/key`, then runs `scripts/redeem_bootstrap.ts`.
-5. Bob's Zo stores the signed invite in `inbox.jsonl`.
-6. Bob says accept or decline.
+2. Alice gets a generated message containing the Skill URL, invite code, Alice's Zoiree service URL, and a request to ask Bob before accepting.
+3. If Alice has connected email and approves sending, Alice's Zo sends Bob the generated message. If Alice does not have connected email, Zoiree shows Alice the exact message to send manually.
+4. Bob reads the invite in his Zo inbox and pastes the prompt into Zo chat. Bob does not need connected email; if he has it, it is only extra convenience for finding or processing the prompt.
+5. Bob tells Zo to clone or update the Zoiree repo and use the bundled `Skills/zoiree` skill from the repo.
+6. The skill installs Zoiree, registers the HTTP service, verifies `/health` and `/api/federation/key`, then runs `scripts/redeem_bootstrap.ts`.
+7. Bob's Zo stores the signed invite in `inbox.jsonl`.
+8. Bob says accept or decline.
 
-Email/bootstrap is not trusted. It only carries the code and setup instruction. Bob's local Zo must ask before installation and before accepting.
+Email/bootstrap is optional, untrusted transport. It only carries the code and setup instruction. Bob's local Zo must ask before installation and before accepting.
 
 ## Inbox State
 
