@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { generateIdentityKeys } from "../src/crypto";
 
@@ -11,33 +11,61 @@ function arg(name: string): string | undefined {
   return undefined;
 }
 
-const handle = arg("handle");
+const handleArg = arg("handle");
 const baseUrl = arg("base-url");
 const writeEnv = Bun.argv.includes("--write-env");
+const preserveKeys = Bun.argv.includes("--preserve-keys");
+const dataDir = Bun.env.ZOIREE_DATA_DIR ?? "/home/workspace/Federation";
 
+async function readExistingEnv(): Promise<Record<string, string>> {
+  try {
+    const text = await readFile(".env", "utf8");
+    const map: Record<string, string> = {};
+    for (const line of text.split("\n")) {
+      const eq = line.indexOf("=");
+      if (eq <= 0) continue;
+      map[line.slice(0, eq).trim()] = line.slice(eq + 1).trim();
+    }
+    return map;
+  } catch {
+    return {};
+  }
+}
+
+const existing = preserveKeys ? await readExistingEnv() : {};
+
+const handle = handleArg ?? existing.ZOIREE_HANDLE;
 if (!handle) {
-  console.error("Usage: bun run scripts/setup.ts --handle @alice.zo.computer [--base-url https://alice.zo.computer] [--write-env]");
+  console.error(
+    "Usage: bun run scripts/setup.ts --handle @alice.zo.computer [--base-url https://...] [--write-env] [--preserve-keys]",
+  );
   process.exit(1);
 }
 
-const keys = generateIdentityKeys();
+const keys = preserveKeys && existing.ZOIREE_PRIVATE_KEY && existing.ZOIREE_PUBLIC_KEY
+  ? { private_key: existing.ZOIREE_PRIVATE_KEY, public_key: existing.ZOIREE_PUBLIC_KEY }
+  : generateIdentityKeys();
+
+const resolvedBaseUrl = baseUrl ?? (preserveKeys ? existing.ZOIREE_BASE_URL : undefined);
+
 const env = [
   `ZOIREE_HANDLE=${handle}`,
-  ...(baseUrl ? [`ZOIREE_BASE_URL=${baseUrl}`] : []),
+  ...(resolvedBaseUrl ? [`ZOIREE_BASE_URL=${resolvedBaseUrl}`] : []),
   `ZOIREE_PRIVATE_KEY=${keys.private_key}`,
   `ZOIREE_PUBLIC_KEY=${keys.public_key}`,
+  `ZOIREE_DATA_DIR=${dataDir}`,
 ].join("\n");
 
 const identity = {
   handle,
-  ...(baseUrl ? { base_url: baseUrl } : {}),
+  ...(resolvedBaseUrl ? { base_url: resolvedBaseUrl } : {}),
   public_key: keys.public_key,
   created_at: new Date().toISOString(),
 };
 
-await mkdir("/home/workspace/Federation", { recursive: true }).catch(() => {});
+await mkdir(dataDir, { recursive: true }).catch(() => {});
 await writeFile(
-  join(Bun.env.ZOIREE_DATA_DIR ?? "/home/workspace/Federation", "identity.json"),
+  join(dataDir, "identity.json"),
   `${JSON.stringify(identity, null, 2)}\n`,
 ).catch(() => {});
 

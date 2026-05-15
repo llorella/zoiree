@@ -3,6 +3,7 @@ import { loadConfig } from "../src/config";
 import { signEnvelope } from "../src/crypto";
 import { deliverEnvelopeOrQueue } from "../src/delivery";
 import { originFromUrl, resolveHandleBaseUrl } from "../src/handle";
+import { resolveEnvelopeId } from "../src/inbox";
 import { FederationStore } from "../src/store";
 import type {
   FederationEnvelope,
@@ -19,9 +20,9 @@ function arg(name: string): string | undefined {
   return undefined;
 }
 
-const inviteId = arg("invite-id");
-if (!inviteId) {
-  console.error("Usage: bun run decline-invite -- --invite-id msg_... [--url https://peer]");
+const inputId = arg("invite-id");
+if (!inputId) {
+  console.error("Usage: bun run decline-invite -- --invite-id msg_... | inbox_... [--url https://peer]");
   process.exit(1);
 }
 
@@ -33,6 +34,13 @@ if (!config.privateKey) {
 
 const store = new FederationStore(config.dataDir);
 await store.init();
+
+const inviteId = await resolveEnvelopeId(store, inputId);
+if (!inviteId) {
+  console.error(`Invite not found: ${inputId}`);
+  process.exit(1);
+}
+
 const invites = await store.readJsonl<FederationEnvelope>(
   join(config.dataDir, "invites.jsonl"),
 );
@@ -40,7 +48,7 @@ const invite = invites.find(
   (entry) => entry.id === inviteId && entry.kind === "party_invite",
 );
 if (!invite) {
-  console.error(`Invite not found: ${inviteId}`);
+  console.error(`Invite not found: ${inputId}`);
   process.exit(1);
 }
 const declinedInvite = invite;

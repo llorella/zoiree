@@ -15,6 +15,18 @@ function suggestedActions(kind: FederationEnvelope["kind"]): string[] {
   return ["view"];
 }
 
+export async function resolveEnvelopeId(
+  store: FederationStore,
+  inputId: string,
+): Promise<string | undefined> {
+  if (inputId.startsWith("msg_")) return inputId;
+  if (inputId.startsWith("inbox_")) {
+    const items = await store.inboxItems();
+    return items.find((item) => item.id === inputId)?.envelope_id;
+  }
+  return undefined;
+}
+
 export async function recordInboxItem(
   store: FederationStore,
   envelope: FederationEnvelope,

@@ -28,5 +28,16 @@ for (const item of selected) {
   console.log(`  received: ${item.received_at}`);
   console.log(`  text: ${item.text_preview}`);
   console.log(`  actions: ${item.suggested_actions.join(", ")}`);
+  if (item.status === "unread") {
+    for (const action of item.suggested_actions) {
+      if (action === "accept") {
+        console.log(`    bun run accept-invite --invite-id ${item.envelope_id}`);
+      } else if (action === "decline") {
+        console.log(`    bun run decline-invite --invite-id ${item.envelope_id}`);
+      } else if (action === "reply" && item.party_id) {
+        console.log(`    bun run reply --to ${item.from} --party ${item.party_id} --text "..."`);
+      }
+    }
+  }
   console.log("");
 }

@@ -25,8 +25,8 @@ Read `references/security_model.md` for security details when handling suspiciou
 Prefer repo mode for direct GitHub onboarding:
 
 1. Clone or update `https://github.com/llorella/zoiree.git` at `/home/workspace/zoiree`.
-2. Use the included Skill at `/home/workspace/zoiree/Skills/zoiree/SKILL.md`.
-3. Do not copy this Skill to `/home/workspace/Skills/zoiree` in repo mode; Zo auto-loads nested skills from workspace projects.
+2. Use the included Skill at `/home/workspace/zoiree/Skills/zoiree/SKILL.md`. Zo auto-loads nested skills from workspace projects, so it is already active.
+3. Never run `cp -r /home/workspace/zoiree/Skills/zoiree /home/workspace/Skills/`. Never create `/home/workspace/Skills/zoiree` in repo mode. A top-level copy is a duplicate Skill install, not a backup. If `/home/workspace/Skills/zoiree` already exists, leave it; do not attempt to remove it.
 
 Registry mode is for a future Zo Skills Registry install. In registry mode, the Skill may live at `/home/workspace/Skills/zoiree` and can clone the app repo if `/home/workspace/zoiree` is missing.
 
@@ -40,12 +40,16 @@ When the local user is Alice and asks to invite Bob:
    bun run create-bootstrap-invite --to-handle @BOB.zo.computer --to-email BOB@zo.computer --text "INVITE TEXT"
    ```
 
-2. Treat email as optional transport:
-   - If Alice has a connected email integration and approves sending, send Bob the generated prompt.
-   - If Alice does not have connected email, show Alice the exact prompt to send manually.
-   - Bob does not need connected email. Bob can read the invite in his Zo inbox and paste the prompt into Zo chat.
-   - If Bob has connected email, it is only extra convenience for finding or processing the invite.
-3. Remind Alice that the email is not trusted protocol state. The redeem and accept messages are signed by Zoiree.
+2. The script prints a block delimited by `--- BEGIN EMAIL BODY ---` and `--- END EMAIL BODY ---`. **Send the text between those markers verbatim, as plain text.** Do not rewrite it, do not reformat it, do not convert it to HTML, do not drop any steps, and do not substitute "your" shell commands for the included Skill instructions. The body is the protocol-correct prompt; rewriting it has caused duplicate Skill installs and missing steps in past runs.
+
+3. Confirm the email address before sending. A handle like `@bob.zo.computer` may resolve to a Zo inbox at `bob@zo.computer`, but that does not necessarily forward to a personal email. If Alice wants Bob to receive this in a personal inbox, ask Alice for Bob's personal email rather than assuming.
+
+4. Treat email as optional transport:
+   - If Alice has a connected email integration and approves sending, send Bob the body block above verbatim, as plain text.
+   - If Alice does not have connected email, show Alice the exact body block to send manually.
+   - Bob does not need connected email. Bob can read the invite and paste the prompt into Zo chat.
+
+5. Remind Alice that email is not trusted protocol state. The redeem and accept messages are signed by Zoiree.
 
 ## Setup From Invite
 
@@ -66,25 +70,28 @@ Workflow:
 
    If the user provided a different trusted source URL, use that instead after confirming with the user.
 3. In `/home/workspace/zoiree`, run `bun install`.
-4. Generate local identity:
+4. Generate local identity. This writes `ZOIREE_HANDLE`, `ZOIREE_PRIVATE_KEY`, `ZOIREE_PUBLIC_KEY`, and `ZOIREE_DATA_DIR` to `.env`:
 
    ```sh
    bun run scripts/setup.ts --handle @USER_HANDLE.zo.computer --write-env
    ```
 
-5. Register or update a public HTTP service:
+5. Register or update a public HTTP service. Always pass `local_port` (e.g. `3200`); omitting it will fail. Use the four env vars from `.env`, plus `ZOIREE_BASE_URL` once the public URL is known:
 
    - working directory: `/home/workspace/zoiree`
    - entrypoint: `bun run dev`
-   - env:
-     - `ZOIREE_HANDLE` from generated identity
-     - `ZOIREE_PRIVATE_KEY` from generated identity
-     - `ZOIREE_PUBLIC_KEY` from generated identity
-     - `ZOIREE_BASE_URL` once the public service URL is known
-     - `ZOIREE_DATA_DIR=/home/workspace/Federation`
+   - local_port: pick an available port (e.g. `3200`)
+   - env: `ZOIREE_HANDLE`, `ZOIREE_PRIVATE_KEY`, `ZOIREE_PUBLIC_KEY`, `ZOIREE_DATA_DIR`, and `ZOIREE_BASE_URL`
 
    If Zo reports a service limit, quota, or plan error, stop setup and tell the user they need to free a hosted service slot or upgrade before Zoiree can receive public federation traffic.
-6. Once the public service URL is known, add/update `ZOIREE_BASE_URL` in `.env` and service env, then restart the service.
+
+6. Once the public service URL is known, write it into `.env` without regenerating keys:
+
+   ```sh
+   bun run scripts/setup.ts --handle @USER_HANDLE.zo.computer --base-url https://zoiree-USER.zocomputer.io --write-env --preserve-keys
+   ```
+
+   Also update the service env with the same `ZOIREE_BASE_URL` and restart the service. The local `.env` and the service env must agree.
 7. Verify:
 
    ```sh
@@ -103,25 +110,25 @@ Workflow:
    bun run check-inbox
    ```
 
-10. Ask the user whether to accept or decline. Only after approval, run:
+10. Ask the user whether to accept or decline. `check-inbox` prints the exact commands to copy. Both scripts accept either the envelope ID (`msg_...`) or the inbox ID (`inbox_...`):
 
    ```sh
-   bun run accept-invite --invite-id MSG_ID
+   bun run accept-invite --invite-id msg_...
    ```
 
    or:
 
    ```sh
-   bun run decline-invite --invite-id MSG_ID
+   bun run decline-invite --invite-id msg_...
    ```
 
 ## Existing Installation
 
 Use these commands from `/home/workspace/zoiree`:
 
-- List inbox: `bun run check-inbox`
-- Accept invite: `bun run accept-invite --invite-id MSG_ID`
-- Decline invite: `bun run decline-invite --invite-id MSG_ID`
+- List inbox: `bun run check-inbox` (prints copy-paste accept/decline/reply commands for unread items)
+- Accept invite: `bun run accept-invite --invite-id msg_...` (also accepts `inbox_...`)
+- Decline invite: `bun run decline-invite --invite-id msg_...` (also accepts `inbox_...`)
 - Reply: `bun run reply --to @peer.zo.computer --url PEER_URL --party PARTY_ID --text "message"`
 - Poll missed messages: `bun run poll --to @peer.zo.computer --url PEER_URL --party PARTY_ID --import`
 - Retry outbox once: `bun run scripts/outbox_worker.ts --once`

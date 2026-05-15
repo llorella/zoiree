@@ -51,29 +51,31 @@ const store = new FederationStore(config.dataDir);
 await store.init();
 await store.saveBootstrapInvite(invite);
 
-const setupLine = `Install Zoiree and redeem invite ${code}`;
-const serviceUrlLine = config.baseUrl
-  ? `Alice's Zoiree service: ${config.baseUrl}`
-  : "Alice will provide her Zoiree service URL separately.";
-const aliceUrl = config.baseUrl ?? "ALICE_ZOIREE_SERVICE_URL";
+const inviterUrl = config.baseUrl ?? "INVITER_ZOIREE_SERVICE_URL";
+const inviterHandle = config.handle;
+
+const emailBody = [
+  `${inviterHandle} wants to connect with you on Zoiree.`,
+  `They say: "${text}"`,
+  "",
+  "Paste this into Zo chat if you want to set it up:",
+  "",
+  `Use the Zoiree setup instructions at ${skillUrl}.`,
+  `Clone or update the Zoiree project from ${repoUrl} into /home/workspace/zoiree.`,
+  "Use the included Skill at /home/workspace/zoiree/Skills/zoiree/SKILL.md. Do not copy or install a second copy into /home/workspace/Skills/zoiree.",
+  `Redeem invite ${code} from ${inviterHandle}'s Zoiree service at ${inviterUrl}.`,
+  "Ask me before accepting or declining the invite.",
+].join("\n");
 
 console.log(JSON.stringify(invite, null, 2));
 console.log("");
-console.log("Suggested email to Bob's Zo:");
+console.log("--- BEGIN EMAIL BODY (send verbatim as plain text; do not rewrite, do not convert to HTML, do not drop steps) ---");
+console.log(emailBody);
+console.log("--- END EMAIL BODY ---");
 console.log("");
-console.log(`${config.handle} wants to connect with you on Zoiree.`);
-console.log(`They say: "${text}"`);
-console.log("");
-console.log("Paste this into Zo chat if you want to set it up:");
-console.log("");
-console.log(`Use the Zoiree setup instructions at ${skillUrl}.`);
-console.log(`Clone or update the Zoiree project from ${repoUrl} into /home/workspace/zoiree.`);
-console.log("Use the included Skill at /home/workspace/zoiree/Skills/zoiree/SKILL.md; do not install a second copy into /home/workspace/Skills/zoiree.");
-console.log(`Redeem invite ${code} from ${aliceUrl}.`);
-console.log("Ask me before accepting or declining the invite.");
-console.log("");
-console.log(`Reference: ${setupLine}.`);
-console.log(serviceUrlLine);
-console.log("If Alice's Zo can send email, send this prompt to Bob. Otherwise Alice can copy and send it manually.");
-console.log("Bob does not need email integration; he only needs to read the invite and paste the prompt into Zo chat.");
-console.log("Only continue if Bob explicitly approves setup and accepting the invite.");
+console.log(`Subject suggestion: Zoiree invite from ${inviterHandle}`);
+console.log("Transport notes:");
+console.log("- If the inviter has connected email, send the body above verbatim as plain text.");
+console.log("- If not, show the body to the inviter so they can send it manually.");
+console.log("- The invitee does not need connected email; they can paste the prompt into Zo chat.");
+console.log("- Only continue on the invitee side after they explicitly approve setup and accept the invite.");
